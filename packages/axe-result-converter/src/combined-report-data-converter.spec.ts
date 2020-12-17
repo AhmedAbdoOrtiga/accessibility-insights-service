@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { CombinedReportDataConverter } from './combined-report-data-converter';
-import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
+import { AxeResult, AxeNodeResult, AxeCoreResults, AxeScanResultsHashable } from './axe-result-types';
 import { ScanResultData } from './scan-result-data';
 
 let combinedReportDataConverter: CombinedReportDataConverter;
@@ -54,7 +54,7 @@ const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: s
     } as AxeResult;
 };
 
-const addAxeResult = (axeResults: AxeResults, ...axeResultList: AxeResult[]): AxeResults => {
+const addAxeResult = (axeResults: AxeScanResultsHashable, ...axeResultList: AxeResult[]): AxeScanResultsHashable => {
     axeResultList.forEach((axeResult) => axeResults.add(axeResult.fingerprint, axeResult));
 
     return axeResults;
@@ -67,7 +67,7 @@ describe(CombinedReportDataConverter, () => {
 
     it('convert axe results to combined report data', () => {
         const violations = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-1', { urls: ['url-11'], nodeId: 'node-11' }),
             getAccumulatedResult('rule-2', { urls: ['url-21', 'url-22'], nodeId: 'node-12' }),
             getAccumulatedResult('rule-2', { urls: ['url-21'], nodeId: 'node-22' }),
@@ -76,17 +76,17 @@ describe(CombinedReportDataConverter, () => {
             getAccumulatedResult('rule-3', { urls: ['url-31'], nodeId: 'node-33' }),
         );
         const passes = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-21', { urls: ['url-21'], nodeId: 'node-21' }),
             getAccumulatedResult('rule-22', { urls: ['url-22'], nodeId: 'node-22' }),
         );
         const incomplete = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-31', { urls: ['url-31'], nodeId: 'node-31' }),
             getAccumulatedResult('rule-32', { urls: ['url-32'], nodeId: 'node-32' }),
         );
         const inapplicable = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-41', { urls: ['url-41'] }),
             getAccumulatedResult('rule-42', { urls: ['url-42'] }),
         );
@@ -104,14 +104,14 @@ describe(CombinedReportDataConverter, () => {
 
     it('Does not repeat failed rules in passed or not applicable sections', () => {
         const failedRuleId = 'failed-rule';
-        const violations = addAxeResult(new AxeResults(), getAccumulatedResult(failedRuleId, { urls: ['url-11'], nodeId: 'node-11' }));
+        const violations = addAxeResult(new AxeScanResultsHashable(), getAccumulatedResult(failedRuleId, { urls: ['url-11'], nodeId: 'node-11' }));
         const passes = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult(failedRuleId, { urls: ['url-21'], nodeId: 'node-21' }),
             getAccumulatedResult('passed-rule', { urls: ['url-22'], nodeId: 'node-22' }),
         );
         const inapplicable = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult(failedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
             getAccumulatedResult('not-applicable-rule', { urls: ['url-32'], nodeId: 'node-32' }),
         );
@@ -119,7 +119,7 @@ describe(CombinedReportDataConverter, () => {
         const axeCoreResults = {
             violations,
             passes,
-            incomplete: new AxeResults(),
+            incomplete: new AxeScanResultsHashable(),
             inapplicable,
         } as AxeCoreResults;
 
@@ -138,17 +138,17 @@ describe(CombinedReportDataConverter, () => {
 
     it('Does not repeat passed rule in not applicable section', () => {
         const passedRuleId = 'passed-rule';
-        const passes = addAxeResult(new AxeResults(), getAccumulatedResult(passedRuleId, { urls: ['url-21'], nodeId: 'node-21' }));
+        const passes = addAxeResult(new AxeScanResultsHashable(), getAccumulatedResult(passedRuleId, { urls: ['url-21'], nodeId: 'node-21' }));
         const inapplicable = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult(passedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
             getAccumulatedResult('not-applicable-rule', { urls: ['url-32'], nodeId: 'node-32' }),
         );
 
         const axeCoreResults = {
-            violations: new AxeResults(),
+            violations: new AxeScanResultsHashable(),
             passes,
-            incomplete: new AxeResults(),
+            incomplete: new AxeScanResultsHashable(),
             inapplicable,
         } as AxeCoreResults;
 
@@ -165,7 +165,7 @@ describe(CombinedReportDataConverter, () => {
     it('sorts failure cards by url count, then alphabetically by url', () => {
         const ruleId = 'rule-id';
         const violations = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             // failure cards should be sorted in the reverse of this order
             getAccumulatedResult(ruleId, { urls: ['url-a'], nodeId: 'node-4' }),
             getAccumulatedResult(ruleId, { urls: ['url-c', 'url-d'], nodeId: 'node-3' }),
@@ -174,9 +174,9 @@ describe(CombinedReportDataConverter, () => {
         );
         const axeCoreResults = {
             violations,
-            passes: new AxeResults(),
-            inapplicable: new AxeResults(),
-            incomplete: new AxeResults(),
+            passes: new AxeScanResultsHashable(),
+            inapplicable: new AxeScanResultsHashable(),
+            incomplete: new AxeScanResultsHashable(),
         } as AxeCoreResults;
 
         const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
@@ -188,16 +188,16 @@ describe(CombinedReportDataConverter, () => {
         const ruleId1 = 'rule-id-1';
         const ruleId2 = 'rule-id-2';
         const violations = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult(ruleId1, { urls: ['url-1', 'url-2', 'url-3'], nodeId: 'node-1' }),
             getAccumulatedResult(ruleId1, { urls: ['url-4'], nodeId: 'node-2' }),
             getAccumulatedResult(ruleId2, { urls: ['url-5'], nodeId: 'node-3' }),
         );
         const axeCoreResults = {
             violations,
-            passes: new AxeResults(),
-            inapplicable: new AxeResults(),
-            incomplete: new AxeResults(),
+            passes: new AxeScanResultsHashable(),
+            inapplicable: new AxeScanResultsHashable(),
+            incomplete: new AxeScanResultsHashable(),
         } as AxeCoreResults;
 
         const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);

@@ -6,7 +6,7 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { HashGenerator } from 'common';
 import axe from 'axe-core';
 import { AxeResultsReducer } from './axe-results-reducer';
-import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
+import { AxeResult, AxeNodeResult, AxeCoreResults, AxeScanResultsHashable } from './axe-result-types';
 
 let hashGeneratorMock: IMock<HashGenerator>;
 let axeResultsReducer: AxeResultsReducer;
@@ -27,10 +27,10 @@ const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: s
         fingerprint: data.nodeId ? `id-${ruleId}|snippet-${data.nodeId}|selector-${data.nodeId}` : `id-${ruleId}`,
     } as AxeResult;
 };
-const addAxeResult = (axeResults: AxeResults, ...axeResultList: AxeResult[]): AxeResults => {
-    axeResultList.forEach((axeResult) => axeResults.add(axeResult.fingerprint, axeResult));
+const addAxeResult = (axeScanResults: AxeScanResultsHashable, ...axeResultList: AxeResult[]): AxeScanResultsHashable => {
+    axeResultList.forEach((axeResult) => axeScanResults.add(axeResult.fingerprint, axeResult));
 
-    return axeResults;
+    return axeScanResults;
 };
 const getCurrentNode = (nodeId: string) => {
     return {
@@ -65,10 +65,10 @@ describe(AxeResultsReducer, () => {
     it('reduce axe result', () => {
         const url = 'url-1';
         const accumulatedResults = {
-            violations: new AxeResults(),
-            passes: new AxeResults(),
-            incomplete: new AxeResults(),
-            inapplicable: new AxeResults(),
+            violations: new AxeScanResultsHashable(),
+            passes: new AxeScanResultsHashable(),
+            incomplete: new AxeScanResultsHashable(),
+            inapplicable: new AxeScanResultsHashable(),
         } as AxeCoreResults;
         const violations = getCurrentResults('rule-1', 'node-11');
         const passes = getCurrentResults('rule-2', 'node-21');
@@ -90,7 +90,7 @@ describe(AxeResultsReducer, () => {
 
     it('reduce result without nodes', () => {
         const currentUrl = 'url-2';
-        const accumulatedResults = addAxeResult(new AxeResults(), getAccumulatedResult('rule-1', { urls: ['url-1'] }));
+        const accumulatedResults = addAxeResult(new AxeScanResultsHashable(), getAccumulatedResult('rule-1', { urls: ['url-1'] }));
         const currentResults = getCurrentResults('rule-1');
         const expectedResults = [getAccumulatedResult('rule-1', { urls: ['url-1', currentUrl] })];
 
@@ -104,10 +104,10 @@ describe(AxeResultsReducer, () => {
 
     it('skip same rule node', () => {
         const currentUrl = 'url-2';
-        const accumulatedResults = addAxeResult(new AxeResults(), getAccumulatedResult('rule-1', { urls: ['url-1'], nodeId: 'node-1' }));
+        const accumulatedResults = addAxeResult(new AxeScanResultsHashable(), getAccumulatedResult('rule-1', { urls: ['url-1'], nodeId: 'node-1' }));
         const currentResults = getCurrentResults('rule-1', 'node-1', 'node-2', 'node-3');
         const expectedResults = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-1', { urls: ['url-1', currentUrl], nodeId: 'node-1' }),
             getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
             getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
@@ -123,10 +123,10 @@ describe(AxeResultsReducer, () => {
 
     it('split multiple nodes from a single result', () => {
         const currentUrl = 'url-1';
-        const accumulatedResults = new AxeResults();
+        const accumulatedResults = new AxeScanResultsHashable();
         const currentResults = getCurrentResults('rule-1', 'node-1', 'node-2', 'node-3');
         const expectedResults = addAxeResult(
-            new AxeResults(),
+            new AxeScanResultsHashable(),
             getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-1' }),
             getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
             getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),

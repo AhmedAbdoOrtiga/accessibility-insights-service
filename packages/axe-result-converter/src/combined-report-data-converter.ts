@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { injectable } from 'inversify';
 import { HashSet } from 'common';
 import { ScanResultData } from './scan-result-data';
-import { AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
+import { AxeNodeResult, AxeCoreResults, AxeScanResultsHashable } from './axe-result-types';
 
 type SortableFailuresGroup = {
     failuresGroup: FailuresGroup;
@@ -77,7 +77,7 @@ export class CombinedReportDataConverter {
         return this.sortFailuresGroups(failuresGroup);
     }
 
-    private getFailureData(results: AxeResults): FailureData[] {
+    private getFailureData(results: AxeScanResultsHashable): FailureData[] {
         const failureData: FailureData[] = [];
         if (!results) {
             return failureData;
@@ -98,7 +98,7 @@ export class CombinedReportDataConverter {
         return failureData;
     }
 
-    private getAxeRuleData(results: AxeResults, excludeRuleIds: HashSet<string>): AxeRuleData[] {
+    private getAxeRuleData(results: AxeScanResultsHashable, excludeRuleIds: HashSet<string>): AxeRuleData[] {
         const axeRuleData = new HashSet<AxeRuleData>();
         if (results) {
             for (const result of results) {
