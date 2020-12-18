@@ -1,10 +1,11 @@
 {
-    "name": "accessibility-insights-scan",
-    "version": "0.5.1",
+    "name": "accessibility-insights-scan-local",
+    "version": "0.5.2",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
         "cbuild": "npm-run-all --serial clean build",
+        "cleanModules": "rimraf node_modules",
         "pack": "npm-run-all --serial create-drop-dir pack-to-drop-dir",
         "pack-to-drop-dir": "yarn pack --filename drop/cli.tgz",
         "create-drop-dir": "npx mkdirp drop",
@@ -35,7 +36,6 @@
         "@types/node": "^12.12.54",
         "@types/normalize-path": "^3.0.0",
         "@types/table": "^6.0.0",
-        "accessibility-insights-crawler": "1.0.0",
         "axe-result-converter": "^1.0.0",
         "common": "^1.0.0",
         "copy-webpack-plugin": "^6.3.2",
@@ -47,14 +47,15 @@
         "mkdirp": "^1.0.4",
         "mockdate": "^3.0.2",
         "rimraf": "^3.0.2",
-        "scanner-global-library": "1.0.0",
         "shebang-loader": "^0.0.1",
         "ts-jest": "^26.3.0",
         "typemoq": "^2.1.0",
         "typescript": "^4.1.2",
         "webpack": "^4.44.2",
         "webpack-cli": "^3.3.12",
-        "webpack-node-externals": "^2.5.1"
+        "webpack-node-externals": "^2.5.1",
+        "accessibility-insights-crawler": "1.0.0",
+        "scanner-global-library": "1.0.0"
     },
     "dependencies": {
         "@axe-core/puppeteer": "^4.0.0",

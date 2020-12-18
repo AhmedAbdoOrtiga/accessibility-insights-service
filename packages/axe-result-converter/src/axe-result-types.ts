@@ -7,13 +7,13 @@ export declare type SelectorType = 'xpath' | 'css';
 
 export interface AxeCoreResults extends Omit<axe.AxeResults, 'passes' | 'violations' | 'incomplete' | 'inapplicable'> {
     urls: string[];
-    passes: AxeResults;
-    violations: AxeResults;
-    incomplete: AxeResults;
-    inapplicable: AxeResults;
+    passes: AxeScanResultsHashable;
+    violations: AxeScanResultsHashable;
+    incomplete: AxeScanResultsHashable;
+    inapplicable: AxeScanResultsHashable;
 }
 
-export class AxeResults extends HashSet<AxeResult> {}
+export class AxeScanResultsHashable extends HashSet<AxeResult> {}
 
 export interface AxeResult extends axe.Result {
     urls: string[];

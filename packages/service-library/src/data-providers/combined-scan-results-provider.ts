@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Readable } from 'stream';
-import { AxeResults } from 'axe-result-converter';
+import { AxeScanResultsHashable } from 'axe-result-converter';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
@@ -96,10 +96,10 @@ export class CombinedScanResultsProvider {
             },
             axeResults: {
                 urls: [],
-                violations: new AxeResults().serialize(),
-                passes: new AxeResults().serialize(),
-                incomplete: new AxeResults().serialize(),
-                inapplicable: new AxeResults().serialize(),
+                violations: new AxeScanResultsHashable().serialize(),
+                passes: new AxeScanResultsHashable().serialize(),
+                incomplete: new AxeScanResultsHashable().serialize(),
+                inapplicable: new AxeScanResultsHashable().serialize(),
             } as CombinedAxeResults,
         };
 

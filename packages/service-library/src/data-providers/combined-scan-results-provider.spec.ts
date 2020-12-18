@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, BlobContentUploadResponse } from 'azure-services';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
-import { AxeResults } from 'axe-result-converter';
+import { AxeScanResultsHashable } from 'axe-result-converter';
 import { BodyParser } from 'common';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
@@ -32,10 +32,10 @@ describe(CombinedScanResultsProvider, () => {
         },
         axeResults: {
             urls: [],
-            violations: new AxeResults().serialize(),
-            passes: new AxeResults().serialize(),
-            incomplete: new AxeResults().serialize(),
-            inapplicable: new AxeResults().serialize(),
+            violations: new AxeScanResultsHashable().serialize(),
+            passes: new AxeScanResultsHashable().serialize(),
+            incomplete: new AxeScanResultsHashable().serialize(),
+            inapplicable: new AxeScanResultsHashable().serialize(),
         } as CombinedAxeResults,
     };
     const emptyResultsString = JSON.stringify(emptyResults);
