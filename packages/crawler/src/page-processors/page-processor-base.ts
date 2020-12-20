@@ -3,7 +3,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { BrowserError, PageNavigator } from 'scanner-global-library';
+import { BrowserError, PageNavigator, WebDriver } from 'scanner-global-library';
 import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -57,6 +57,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(WebDriver) protected readonly webDriver: WebDriver,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
@@ -65,6 +66,20 @@ export abstract class PageProcessorBase implements PageProcessor {
         this.discoveryLinks = this.crawlerConfiguration.crawl();
         this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
     }
+
+    /**
+     * Function that is called to process each request.
+     */
+    public launchPuppeteerFunction: Apify.LaunchPuppeteerFunction = async (inputs: Apify.LaunchPuppeteerOptions) => {
+        try {
+            const browser = await this.webDriver.launch(this.crawlerConfiguration.chromePath());
+
+            return browser;
+        } catch (err) {
+            // Throw the error so Apify puts it back into the queue to retry
+            throw err;
+        }
+    };
 
     /**
      * Function that is called to process each request.

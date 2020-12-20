@@ -18,6 +18,14 @@ export class CrawlerConfiguration {
         return this.crawlerRunOptions.baseUrl;
     }
 
+    public axeSourcePath(): string {
+        return this.crawlerRunOptions.axeSourcePath;
+    }
+
+    public chromePath(): string {
+        return this.crawlerRunOptions.chromePath;
+    }
+
     public discoveryPatterns(): string[] {
         return this.getDiscoveryPattern(this.crawlerRunOptions.baseUrl, this.crawlerRunOptions.discoveryPatterns);
     }
@@ -52,6 +60,10 @@ export class CrawlerConfiguration {
 
     public setSilentMode(silentMode: boolean): void {
         this.settingsHandler.setApifySettings({ APIFY_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
+    }
+
+    public setChromePath(chromePath: string): void {
+        this.settingsHandler.setApifySettings({ APIFY_CHROME_EXECUTABLE_PATH: chromePath });
     }
 
     private getMaxRequestsPerCrawl(maxRequestsPerCrawl: number): number {

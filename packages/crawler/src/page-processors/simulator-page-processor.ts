@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { PageNavigator } from 'scanner-global-library';
+import { PageNavigator, WebDriver } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -32,6 +32,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(WebDriver) protected readonly webDriver: WebDriver,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
@@ -43,6 +44,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             pageNavigator,
             requestQueueProvider,
             crawlerConfiguration,
+            webDriver,
             enqueueLinksExt,
             saveSnapshotExt,
         );
@@ -56,7 +58,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             console.log(`Processing page ${page.url()}`);
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, requestQueue);
-            const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
+            const axeResults = await this.accessibilityScanOp.run(page, request.id as string, this.crawlerConfiguration.axeSourcePath());
             const issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
             await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
@@ -68,7 +70,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             let issueCount;
             if (operationResult.clickAction === 'page-action') {
                 await this.enqueueLinks(page);
-                const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
+                const axeResults = await this.accessibilityScanOp.run(
+                    page,
+                    request.id as string,
+                    this.crawlerConfiguration.axeSourcePath(),
+                );
                 issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
                 await this.saveSnapshot(page, request.id as string);
                 await this.saveScanResult(request, issueCount, activeElement.selector);

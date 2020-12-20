@@ -96,6 +96,7 @@ describe(SimulatorPageProcessor, () => {
             pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
+            null,
             enqueueLinksExtMock.object,
         );
     });

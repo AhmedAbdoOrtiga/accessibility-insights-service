@@ -85,6 +85,7 @@ describe(ClassicPageProcessor, () => {
             pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
+            null,
             enqueueLinksExtMock.object,
         );
     });

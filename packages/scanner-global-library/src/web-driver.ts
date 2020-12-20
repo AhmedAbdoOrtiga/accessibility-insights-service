@@ -23,6 +23,7 @@ export class WebDriver {
                 height: 1080,
                 deviceScaleFactor: 1,
             },
+            timeout: 120000,
         });
         this.logger?.logInfo('Chromium browser instance started.');
 

@@ -101,6 +101,7 @@ describe(PageProcessorBase, () => {
             pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
+            null,
             enqueueLinksExtMock.object,
             saveSnapshotMock.object,
         );
